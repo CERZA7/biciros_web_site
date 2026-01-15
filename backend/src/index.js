@@ -37,8 +37,7 @@ app.get('/api/health', (req, res) => {
 // Rutas de la API
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
-// La siguiente ruta se agregara en siguiente commit:
-// app.use('/api/blog', require('./routes/blog'));
+app.use('/api/blog', require('./routes/blog'));
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
