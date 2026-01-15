@@ -34,8 +34,9 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Las rutas se agregaran en siguientes commits:
-// app.use('/api/auth', require('./routes/auth'));
+// Rutas de la API
+app.use('/api/auth', require('./routes/auth'));
+// Las siguientes rutas se agregaran en siguientes commits:
 // app.use('/api/products', require('./routes/products'));
 // app.use('/api/blog', require('./routes/blog'));
 
