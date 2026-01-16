@@ -16,6 +16,9 @@ import AdminPanel from './pages/AdminPanel'
 import ProductForm from './pages/ProductForm'
 import CreatePost from './pages/CreatePost'
 import EditPost from './pages/EditPost'
+import MyProducts from './pages/MyProducts'
+import UserProductForm from './pages/UserProductForm'
+import UserManagement from './pages/UserManagement'
 
 function App() {
   return (
@@ -40,6 +43,23 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* Rutas protegidas - mis productos (usuario autenticado) */}
+          <Route path="/my-products" element={
+            <ProtectedRoute>
+              <MyProducts />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-products/new" element={
+            <ProtectedRoute>
+              <UserProductForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-products/edit/:id" element={
+            <ProtectedRoute>
+              <UserProductForm />
+            </ProtectedRoute>
+          } />
+
           {/* Rutas protegidas - solo admin */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin={true}>
@@ -54,6 +74,11 @@ function App() {
           <Route path="/admin/products/edit/:id" element={
             <ProtectedRoute requireAdmin={true}>
               <ProductForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute requireAdmin={true}>
+              <UserManagement />
             </ProtectedRoute>
           } />
 

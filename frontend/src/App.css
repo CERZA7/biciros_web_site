@@ -561,6 +561,82 @@ body {
 }
 
 /* =====================================================
+   ADMIN NAVIGATION
+   ===================================================== */
+.admin-nav {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.admin-nav-link {
+  padding: 0.6rem 1.2rem;
+  text-decoration: none;
+  color: #666;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.admin-nav-link:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.admin-nav-link.active {
+  background-color: #e94560;
+  color: #fff;
+}
+
+/* =====================================================
+   BADGES
+   ===================================================== */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-admin {
+  background-color: #e94560;
+  color: #fff;
+}
+
+.badge-user {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: #fff;
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+  text-transform: none;
+}
+
+/* Fila del usuario actual */
+.current-user-row {
+  background-color: #f8f9fa;
+}
+
+.current-user-row td {
+  font-weight: 500;
+}
+
+/* Propietario en productos */
+.product-owner {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 0.3rem;
+}
+
+/* =====================================================
    RESPONSIVE
    ===================================================== */
 @media (max-width: 768px) {

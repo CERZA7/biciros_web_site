@@ -1,30 +1,30 @@
 /**
- * AdminPanel - Panel de administracion
- * Gestion de productos (solo admin)
+ * MyProducts - Gestion de productos del usuario autenticado
+ * Usuarios pueden ver, crear, editar y eliminar SUS productos
  */
 
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { productsAPI } from '../services/api'
 
-function AdminPanel() {
+function MyProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    loadProducts()
+    loadMyProducts()
   }, [])
 
-  const loadProducts = async () => {
+  const loadMyProducts = async () => {
     try {
       setLoading(true)
-      const response = await productsAPI.getAll()
+      const response = await productsAPI.getMyProducts()
       setProducts(response.products || [])
       setError(null)
     } catch (err) {
-      setError('Error al cargar los productos')
+      setError('Error al cargar tus productos')
       console.error(err)
     } finally {
       setLoading(false)
@@ -50,7 +50,7 @@ function AdminPanel() {
       <div className="page-container">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Cargando productos...</p>
+          <p>Cargando tus productos...</p>
         </div>
       </div>
     )
@@ -59,23 +59,14 @@ function AdminPanel() {
   return (
     <div className="page-container">
       <header className="page-header">
-        <h1>Panel de Administracion</h1>
-        <p>Gestion de productos de la tienda</p>
+        <h1>Mis Productos</h1>
+        <p>Gestiona los productos que has publicado</p>
       </header>
-
-      <nav className="admin-nav">
-        <Link to="/admin" className="admin-nav-link active">
-          Productos
-        </Link>
-        <Link to="/admin/users" className="admin-nav-link">
-          Usuarios
-        </Link>
-      </nav>
 
       {error && (
         <div className="alert alert-error">
           {error}
-          <button onClick={loadProducts} className="btn btn-sm">
+          <button onClick={loadMyProducts} className="btn btn-sm" style={{ marginLeft: '10px' }}>
             Reintentar
           </button>
         </div>
@@ -84,13 +75,18 @@ function AdminPanel() {
       <section className="admin-section">
         <div className="admin-header">
           <h2>Productos ({products.length})</h2>
-          <Link to="/admin/products/new" className="btn btn-primary">
+          <Link to="/my-products/new" className="btn btn-primary">
             Agregar Producto
           </Link>
         </div>
 
         {products.length === 0 ? (
-          <p className="no-data">No hay productos registrados</p>
+          <div className="no-data">
+            <p>No has publicado productos aun</p>
+            <Link to="/my-products/new" className="btn btn-primary" style={{ marginTop: '15px' }}>
+              Publicar mi primer producto
+            </Link>
+          </div>
         ) : (
           <div className="admin-table-container">
             <table className="admin-table">
@@ -100,7 +96,6 @@ function AdminPanel() {
                   <th>Imagen</th>
                   <th>Nombre</th>
                   <th>Precio</th>
-                  <th>Propietario</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -116,15 +111,14 @@ function AdminPanel() {
                           className="admin-table-image"
                         />
                       ) : (
-                        <span className="no-image">-</span>
+                        <span className="no-image">Sin imagen</span>
                       )}
                     </td>
                     <td>{product.name}</td>
                     <td>${Number(product.price).toFixed(2)}</td>
-                    <td>{product.owner_name || 'Desconocido'}</td>
                     <td className="admin-actions">
                       <button
-                        onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                        onClick={() => navigate(`/my-products/edit/${product.id}`)}
                         className="btn btn-secondary btn-sm"
                       >
                         Editar
@@ -147,4 +141,4 @@ function AdminPanel() {
   )
 }
 
-export default AdminPanel
+export default MyProducts

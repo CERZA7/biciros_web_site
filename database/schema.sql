@@ -30,17 +30,21 @@ CREATE TABLE IF NOT EXISTS users (
 -- =====================================================
 -- TABLA: products
 -- Almacena los productos de la tienda de ciclismo
+-- Cada producto pertenece a un usuario (user_id)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     image_url VARCHAR(500),
+    user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_name (name),
-    INDEX idx_price (price)
+    INDEX idx_price (price),
+    INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB;
 
 -- =====================================================
@@ -73,13 +77,24 @@ INSERT INTO users (email, password_hash, name, role) VALUES
 
 -- =====================================================
 -- DATOS DE PRUEBA: Productos de ciclismo
+-- user_id = 1 (admin) para productos iniciales
 -- =====================================================
-INSERT INTO products (name, price, image_url) VALUES
-('Bicicleta de Montaña Pro X500', 1299.99, 'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=500'),
-('Casco Aerodinámico Elite', 189.99, 'https://images.unsplash.com/photo-1557803175-2f8c4dfba84e?w=500'),
-('Guantes Ciclismo Gel Premium', 45.99, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500'),
-('Luz LED Delantera 1000 Lumens', 79.99, 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=500'),
-('Candado U-Lock Seguridad Máxima', 65.00, 'https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=500');
+INSERT INTO products (name, price, image_url, user_id) VALUES
+('Bicicleta de Montaña Pro X500', 1299.99, 'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=500', 1),
+('Casco Aerodinámico Elite', 189.99, 'https://images.unsplash.com/photo-1557803175-2f8c4dfba84e?w=500', 1),
+('Guantes Ciclismo Gel Premium', 45.99, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500', 1),
+('Luz LED Delantera 1000 Lumens', 79.99, 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=500', 1),
+('Candado U-Lock Seguridad Máxima', 65.00, 'https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=500', 1);
+
+-- =====================================================
+-- MIGRACION: Para bases de datos existentes
+-- Ejecutar si ya tienes productos sin user_id
+-- =====================================================
+-- ALTER TABLE products ADD COLUMN user_id INT NULL AFTER image_url;
+-- UPDATE products SET user_id = 1 WHERE user_id IS NULL;
+-- ALTER TABLE products MODIFY COLUMN user_id INT NOT NULL;
+-- ALTER TABLE products ADD CONSTRAINT fk_products_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+-- CREATE INDEX idx_user_id ON products(user_id);
 
 -- =====================================================
 -- DATOS DE PRUEBA: Posts del Blog

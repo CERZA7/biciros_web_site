@@ -38,6 +38,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/blog', require('./routes/blog'));
+app.use('/api/users', require('./routes/users'));
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {

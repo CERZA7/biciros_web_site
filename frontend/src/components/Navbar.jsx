@@ -32,6 +32,13 @@ function Navbar() {
           Blog
         </Link>
 
+        {/* Link Mis Productos - usuarios autenticados */}
+        {isAuthenticated && (
+          <Link to="/my-products" className="navbar-link">
+            Mis Productos
+          </Link>
+        )}
+
         {/* Link Admin - solo para administradores */}
         {isAdmin && (
           <Link to="/admin" className="navbar-link navbar-link-admin">
