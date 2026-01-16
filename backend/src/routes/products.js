@@ -1,22 +1,28 @@
 /**
  * Rutas de Productos
- * CRUD completo - Solo admin puede crear/editar/eliminar
+ * - Usuarios autenticados pueden crear/editar/eliminar SUS propios productos
+ * - Admin puede gestionar TODOS los productos
+ * - Listado publico para todos
  */
 
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
 const authMiddleware = require('../middleware/auth');
-const adminAuthMiddleware = require('../middleware/adminAuth');
 
 /**
  * GET /api/products
  * Listar todos los productos (publico)
+ * Incluye nombre del propietario
  */
 router.get('/', async (req, res) => {
     try {
         const [products] = await pool.execute(
-            'SELECT id, name, price, image_url, created_at, updated_at FROM products ORDER BY created_at DESC'
+            `SELECT p.id, p.name, p.price, p.image_url, p.user_id,
+                    p.created_at, p.updated_at, u.name as owner_name
+             FROM products p
+             JOIN users u ON p.user_id = u.id
+             ORDER BY p.created_at DESC`
         );
 
         res.json({
@@ -35,6 +41,35 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/products/my
+ * Obtener productos del usuario autenticado
+ */
+router.get('/my', authMiddleware, async (req, res) => {
+    try {
+        const [products] = await pool.execute(
+            `SELECT id, name, price, image_url, created_at, updated_at
+             FROM products
+             WHERE user_id = ?
+             ORDER BY created_at DESC`,
+            [req.user.id]
+        );
+
+        res.json({
+            error: false,
+            count: products.length,
+            products
+        });
+
+    } catch (error) {
+        console.error('Error al listar mis productos:', error);
+        res.status(500).json({
+            error: true,
+            message: 'Error al obtener tus productos'
+        });
+    }
+});
+
+/**
  * GET /api/products/:id
  * Obtener un producto por ID (publico)
  */
@@ -43,7 +78,11 @@ router.get('/:id', async (req, res) => {
         const { id } = req.params;
 
         const [products] = await pool.execute(
-            'SELECT id, name, price, image_url, created_at, updated_at FROM products WHERE id = ?',
+            `SELECT p.id, p.name, p.price, p.image_url, p.user_id,
+                    p.created_at, p.updated_at, u.name as owner_name
+             FROM products p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.id = ?`,
             [id]
         );
 
@@ -70,9 +109,9 @@ router.get('/:id', async (req, res) => {
 
 /**
  * POST /api/products
- * Crear nuevo producto (solo admin)
+ * Crear nuevo producto (usuarios autenticados)
  */
-router.post('/', authMiddleware, adminAuthMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
     try {
         const { name, price, image_url } = req.body;
 
@@ -101,15 +140,19 @@ router.post('/', authMiddleware, adminAuthMiddleware, async (req, res) => {
             });
         }
 
-        // Insertar producto
+        // Insertar producto con user_id del usuario autenticado
         const [result] = await pool.execute(
-            'INSERT INTO products (name, price, image_url) VALUES (?, ?, ?)',
-            [name.trim(), priceNum, image_url || null]
+            'INSERT INTO products (name, price, image_url, user_id) VALUES (?, ?, ?, ?)',
+            [name.trim(), priceNum, image_url || null, req.user.id]
         );
 
         // Obtener el producto creado
         const [newProduct] = await pool.execute(
-            'SELECT id, name, price, image_url, created_at, updated_at FROM products WHERE id = ?',
+            `SELECT p.id, p.name, p.price, p.image_url, p.user_id,
+                    p.created_at, p.updated_at, u.name as owner_name
+             FROM products p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.id = ?`,
             [result.insertId]
         );
 
@@ -130,16 +173,16 @@ router.post('/', authMiddleware, adminAuthMiddleware, async (req, res) => {
 
 /**
  * PUT /api/products/:id
- * Actualizar producto existente (solo admin)
+ * Actualizar producto (propietario o admin)
  */
-router.put('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         const { name, price, image_url } = req.body;
 
         // Verificar que el producto existe
         const [existing] = await pool.execute(
-            'SELECT id FROM products WHERE id = ?',
+            'SELECT id, user_id FROM products WHERE id = ?',
             [id]
         );
 
@@ -147,6 +190,15 @@ router.put('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
             return res.status(404).json({
                 error: true,
                 message: 'Producto no encontrado'
+            });
+        }
+
+        // Verificar permisos: propietario o admin
+        const product = existing[0];
+        if (product.user_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({
+                error: true,
+                message: 'No tienes permiso para editar este producto'
             });
         }
 
@@ -183,7 +235,11 @@ router.put('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
 
         // Obtener el producto actualizado
         const [updated] = await pool.execute(
-            'SELECT id, name, price, image_url, created_at, updated_at FROM products WHERE id = ?',
+            `SELECT p.id, p.name, p.price, p.image_url, p.user_id,
+                    p.created_at, p.updated_at, u.name as owner_name
+             FROM products p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.id = ?`,
             [id]
         );
 
@@ -204,15 +260,15 @@ router.put('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
 
 /**
  * DELETE /api/products/:id
- * Eliminar producto (solo admin)
+ * Eliminar producto (propietario o admin)
  */
-router.delete('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
 
         // Verificar que el producto existe
         const [existing] = await pool.execute(
-            'SELECT id, name FROM products WHERE id = ?',
+            'SELECT id, name, user_id FROM products WHERE id = ?',
             [id]
         );
 
@@ -223,12 +279,21 @@ router.delete('/:id', authMiddleware, adminAuthMiddleware, async (req, res) => {
             });
         }
 
+        // Verificar permisos: propietario o admin
+        const product = existing[0];
+        if (product.user_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({
+                error: true,
+                message: 'No tienes permiso para eliminar este producto'
+            });
+        }
+
         // Eliminar producto
         await pool.execute('DELETE FROM products WHERE id = ?', [id]);
 
         res.json({
             error: false,
-            message: `Producto "${existing[0].name}" eliminado exitosamente`
+            message: `Producto "${product.name}" eliminado exitosamente`
         });
 
     } catch (error) {

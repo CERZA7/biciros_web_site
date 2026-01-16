@@ -65,27 +65,61 @@ export const productsAPI = {
     return response.data
   },
 
+  // Obtener productos del usuario autenticado
+  getMyProducts: async () => {
+    const response = await api.get('/products/my')
+    return response.data
+  },
+
   // Obtener un producto por ID (publico)
   getById: async (id) => {
     const response = await api.get(`/products/${id}`)
     return response.data
   },
 
-  // Crear producto (solo admin)
+  // Crear producto (usuario autenticado)
   create: async (productData) => {
     const response = await api.post('/products', productData)
     return response.data
   },
 
-  // Actualizar producto (solo admin)
+  // Actualizar producto (propietario o admin)
   update: async (id, productData) => {
     const response = await api.put(`/products/${id}`, productData)
     return response.data
   },
 
-  // Eliminar producto (solo admin)
+  // Eliminar producto (propietario o admin)
   delete: async (id) => {
     const response = await api.delete(`/products/${id}`)
+    return response.data
+  }
+}
+
+// ==================== USERS (Admin) ====================
+
+export const usersAPI = {
+  // Listar todos los usuarios (solo admin)
+  getAll: async () => {
+    const response = await api.get('/users')
+    return response.data
+  },
+
+  // Obtener un usuario por ID (solo admin)
+  getById: async (id) => {
+    const response = await api.get(`/users/${id}`)
+    return response.data
+  },
+
+  // Cambiar rol de usuario (solo admin)
+  updateRole: async (id, role) => {
+    const response = await api.put(`/users/${id}/role`, { role })
+    return response.data
+  },
+
+  // Eliminar usuario (solo admin)
+  delete: async (id) => {
+    const response = await api.delete(`/users/${id}`)
     return response.data
   }
 }
