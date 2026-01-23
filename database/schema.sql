@@ -81,7 +81,7 @@ INSERT INTO users (email, password_hash, name, role) VALUES
 -- =====================================================
 INSERT INTO products (name, price, image_url, user_id) VALUES
 ('Bicicleta de Montaña Pro X500', 1299.99, 'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=500', 1),
-('Casco Aerodinámico Elite', 189.99, 'https://images.unsplash.com/photo-1557803175-2f8c4dfba84e?w=500', 1),
+('Casco Aerodinámico Elite', 189.99, 'https://mybike.com.co/wp-content/uploads/2025/08/1754992320_39Ya-estoy-contando-los-anos-hasta-la-jubilacion39-Tadej.jpg', 1),
 ('Guantes Ciclismo Gel Premium', 45.99, 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500', 1),
 ('Luz LED Delantera 1000 Lumens', 79.99, 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=500', 1),
 ('Candado U-Lock Seguridad Máxima', 65.00, 'https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=500', 1);
